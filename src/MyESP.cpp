@@ -179,19 +179,17 @@ void MyESP::startPage()
 		EEPROM.write(350+n, t1);
 	EEPROM.commit();
 	n++;
-	char   d1 = EEPROM.read(1);
-	char   d2 = EEPROM.read(2);
-    		Serial.print(d1);
-    		Serial.print(d2);
-
     	}
+    }
+    if(n)
+    {
+        EEPROM.write(380, n);
+	EEPROM.commit();
     }
     if (request->hasParam("czas")) {
     	in = request->getParam("czas")->value();
-	char t1 = in[0];
-	char t2 = in[1];
+	int t1 = in.toInt();
         EEPROM.write(0, t1);
-        EEPROM.write(0, t2);
 	EEPROM.commit();
 		
     }

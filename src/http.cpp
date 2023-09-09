@@ -57,8 +57,8 @@ page += "<p><input type=\"submit\" value=\"Submit\"></p>";
 page +=  "<p></br> </p>";
 page += "<p><b>Ustawione parametry podlewania:</b></p>";
 
-
-for (int i = 0; i < 8; i++)
+int n_line = EEPROM.read(380);
+for (int i = 0; i < n_line; i++)
 {
     int z1 = EEPROM.read(350 + i);
 //    if (z != 100)
@@ -69,9 +69,8 @@ for (int i = 0; i < 8; i++)
     }
 }
     page +=  "<p>Czas podlewania: ";
-    char z1 = EEPROM.read(0);
-    char z2 = EEPROM.read(1);
-    page += z1 + z2;
+    int z1 = EEPROM.read(0);
+    page += z1;
 
     page += " sekund</p>";
     page +=  "<p></br></p>";
