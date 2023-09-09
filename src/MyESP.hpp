@@ -1,18 +1,22 @@
 #pragma once 
-//#include "Arduino.h"
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
+#include "Arduino.h"
+
+//#include <ESP8266WiFi.h>
+  #include <WiFi.h>
+  #include <AsyncTCP.h>
+//#include <WiFiClient.h>
+//#include <ESP8266WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <time.h>
 #include <EEPROM.h>
 #include <Wire.h>
 #include <Ticker.h>
 #include <DNSServer.h>
 //#include <WiFiManager.h>
-#include <ESP8266HTTPClient.h>
+//#include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
-#include "html.h"
 #include "ThingSpeak.h"
+#include "http.hpp"
 
 #define EEPROM_SIZE 512
 class MyMotor {
@@ -21,6 +25,8 @@ class MyMotor {
 	int PWMA_ = 5; //Speed control
 	int AIN1_ = 14; //Direction
 	int AIN2_ = 4; //Direction
+	int BIN1_ = 14; //Direction 1
+	int BIN2_ = 1; //Direction 0
 	int time_wait = 0;
 	Ticker d;
 	static void wait()
@@ -29,8 +35,11 @@ class MyMotor {
 		time_elaps++;
 	}
 public:
-	MyMotor(int STBY = 12, int PWMA = 5, int AIN1 = 14, int AIN2 = 4);
-	void startWatering();
+	MyMotor(int STBY = 12, int PWMA = 5, int AIN1 = 14, int AIN2 = 4, int BIN1 = 14, int BIN2 = 1);
+
+	void startWatering(int time_w);
+	void startWatering_A(int time_w);
+	void startWatering_B(int time_w);
 	void stopWatering();
 };
 
@@ -45,11 +54,13 @@ protected:
 	int pushButton = 13; // push button
 	int IPButton = 14; // button to show IP
 	int act_line;
-const char* ssid = "Vectra-WiFi-260244";//type your ssid
-const char* password = "vnet278750378";//type your password
+//const char* ssid = "CGA2121_VzpmSRV";
+//const char* password = "b1e514f452ea181e991056b9cbee3df73acdb2c5e8bc6dafcd96c66a9840bb48";
+	const char* ssid="FunBox2-F968";
+	const char* password ="CD3EE7CC7CC7967A39EEFD1721";
 //const char* ssid = "TFO-WiFi";//type your ssid
 //const char* password = "accessok";//type your password
-	ESP8266WebServer server{80};
+	AsyncWebServer server{80};
 	Ticker measuer5minuts;
 	Ticker ticker;
 	String czas;
@@ -58,7 +69,6 @@ const char* password = "vnet278750378";//type your password
 	{
 		analogWrite(LED_BUILTIN, 1024);
 		myMotor.stopWatering();
-		Serial.println("I'm going sleep to 1h");
         	//ESP.deepSleep(60*60e6);
 		goSleep();
 	}
@@ -67,7 +77,7 @@ const char* password = "vnet278750378";//type your password
 		static int state = 1;
 	  if (state)
 	  {
-		  analogWrite(LED_BUILTIN, 1010);
+		  analogWrite(LED_BUILTIN, 230);
 	  } else
 	  {
 		  analogWrite(LED_BUILTIN, 1024);
@@ -77,7 +87,6 @@ const char* password = "vnet278750378";//type your password
 	}
 	static void goSleep()
 	{
-	   Serial.println("I going to sleep for 20 min");
 	   ESP.deepSleep(20*60e6);
 	}
     String getDateAndTime();

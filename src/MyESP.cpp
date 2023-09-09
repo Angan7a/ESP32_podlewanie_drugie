@@ -1,20 +1,22 @@
 #include "MyESP.hpp"
-#include <ESP8266WiFi.h>
+//#include <ESP8266WiFi.h>
+//#include <WiFiClient.h>
 
 MyESP::MyESP()
 {
+Serial.begin(9600);	
+
   pinMode(LED_BUILTIN, OUTPUT);
   analogWrite(LED_BUILTIN, 1024);
   measuer5minuts.attach(300, goSleep);
-  EEPROM.begin(EEPROM_SIZE);
-  time_water = EEPROM.read(0);
-  h_water = EEPROM.read(1);
-  act_line = EEPROM.read(299);
-  Serial.begin(115200);
+  Serial.begin(9600);
+ EEPROM.begin(512);
+  //time_water = EEPROM.read(0);
+ // h_water = EEPROM.read(1);
+// act_line = EEPROM.read(299);
   delay(100);
   pinMode(pushButton,  INPUT_PULLUP  );
   pinMode(IPButton,  INPUT_PULLUP  );
-//  pinMode(ledPin, OUTPUT);
   ticker.attach(0.6, tick);
   czas = "";
 }
@@ -36,13 +38,9 @@ void MyESP::blinkFast()
 int MyESP::startWiFi()
 {
   WiFi.begin(ssid, password);
-  Serial.println("Connecting");
   while(WiFi.status() != WL_CONNECTED) { 
         delay(500);
-        Serial.print(".");
   }
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
   czas = getDateAndTime();
   return 1;
@@ -50,10 +48,11 @@ int MyESP::startWiFi()
 
 String MyESP::getDateAndTime()
 {
+/*	WiFiClient wifiClient;
 
     const char *host = "http://worldtimeapi.org/api/timezone/Europe/Warsaw";
     HTTPClient http; 
-    http.begin(host);
+    http.begin(wifiClient, host);
   int httpCode = http.GET();            //Send the request
   String payload;
 //  while (httpCode != 200)
@@ -75,6 +74,7 @@ String MyESP::getDateAndTime()
         String out = doc["datetime"]; // "2020-04-23T12:18:56.028849+02:00"
         return out;
   }
+  */
   String er = "-1";
   return er;
 }
@@ -82,8 +82,8 @@ String MyESP::getDateAndTime()
 int MyESP::setStopWateringTime()
 {
 	ticker.detach();
-	analogWrite(LED_BUILTIN, 1020);
-	ticker.attach(time_water, motorStop);
+	analogWrite(LED_BUILTIN, 0);
+	ticker.attach(2*time_water+10, motorStop);
 	return 0;
 }
 
@@ -94,7 +94,7 @@ void MyESP::watering()
 }
 
 void MyESP::startWatering(){
-	myMotor.startWatering();
+	myMotor.startWatering(time_water);
 }
 
 void MyESP::saveWateringTime()
@@ -149,67 +149,64 @@ int MyESP::readEEPROM(int place)
 
 void MyESP::startPage()
 {
-	page = load_page();
-	server.on("/", [&](){
-	    server.send(200, "text/html", page);
-	});
-server.on("/act", [&](){
-     int r[8] = {100, 100, 100, 100, 100, 100, 100, 100};
-     int k = 0;
-     for (int i = 0 ; i < 25; i++)
-     {
-         if (k < 8)
-         {
-            if (server.arg("text" + String(i)) == String(i))
-            {
-                if (i == 24)
-                {
-                    r[k] = 0;
-                } else
-                {
-                     r[k] = i;
-                }
-                k++;
-            }
-         }
-     }
-     int czy_commit = 0;
-     if(r[0] != 100)
-     {
-            for (int i = 0; i < 8; i++)
-            {
-            EEPROM.write(350 + i, r[i]);
-          }
-	  czy_commit = 1;
-     }
-    String time_watering = server.arg("czas");
-    int s =  time_watering.substring(0, 2).toInt();
-    if (s > 0)
-    {
-        EEPROM.write(0, s);
-	  czy_commit = 1;
-    }
-     if (czy_commit)
-     {
-       EEPROM.commit();
-     }
-     page = load_page();
-     server.send(200, "text/html", page);
-     //delay(1000);
-    });
- server.on("/res", [&](){
-     server.send(200, "text/html", page);
-     //delay(1000);
-     ESP.reset();
-    });
 
-server.begin();
+ page = load_page(); 
+  server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
+    request->send(200, "text/html", "" + page + "");
+  });
+//const char *c = page.c_str();
+
+//server.on("/", [&](AsyncWebServerRequest *request){
+//	    request->send_P(200, "text/html", c);
+//});
+  // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
+  server.on("/act", HTTP_GET, [&] (AsyncWebServerRequest *request) {
+		  EEPROM.begin(512);
+    String inputMessage;
+    String inputParam;
+    String in;
+    int dl_podlewania;
+    int h_podlewania[24] {0};
+    bool first_time = true;
+    int n = 0;
+    for (int i =  0; i < 24; i++)
+    {
+	String IN = "text";
+	IN += i;
+    if (request->hasParam(IN)) {
+    		in = request->getParam(IN)->value();
+    	int t1 = in.toInt();
+		EEPROM.write(350+n, t1);
+	EEPROM.commit();
+	n++;
+	char   d1 = EEPROM.read(1);
+	char   d2 = EEPROM.read(2);
+    		Serial.print(d1);
+    		Serial.print(d2);
+
+    	}
+    }
+    if (request->hasParam("czas")) {
+    	in = request->getParam("czas")->value();
+	char t1 = in[0];
+	char t2 = in[1];
+        EEPROM.write(0, t1);
+        EEPROM.write(0, t2);
+	EEPROM.commit();
+		
+    }
+ page =  load_page();
+    request->send(200, "text/html", "" + page + "");
+  });
+
+ // server.onNotFound(notFound);
+  server.begin();
 
 }
 
 void MyESP::handle()
 {
-	server.handleClient();
+//	server.handleClient();
 }
 
 void MyESP::saveDataToThinkSpeak()
@@ -225,57 +222,62 @@ void MyESP::saveDataToThinkSpeak()
 	int httpCode = ThingSpeak.writeField(myChannelNumber, 1,time_water , myWriteAPIKey);
 
 	 if (httpCode == 200) {
-	      Serial.println("Channel write successful.");
+	      //Serial.println("Channel write successful.");
 	 }
 	 else {
-	       Serial.println("Problem writing to channel. HTTP error code " + String(httpCode));
+	      // Serial.println("Problem writing to channel. HTTP error code " + String(httpCode));
 	 }
 	client.stop();
 }
 
-void MyESP::saveTempToThinkSpeak(float temp)
-{
 
-	WiFiClient  client;
-	ThingSpeak.begin(client);
-	 #define SECRET_CH_ID 1189056                                 // replace 0000000 with your channel number
-	 #define SECRET_WRITE_APIKEY "IHXD144KFX8UOY4B"                           // replace XYZ with your channel write API Key
-	unsigned long myChannelNumber = SECRET_CH_ID;
-	const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
-
-	int httpCode = ThingSpeak.writeField(myChannelNumber, 1, temp , myWriteAPIKey);
-
-	 if (httpCode == 200) {
-	      Serial.println("Temperatue write successful.");
-	 }
-	 else {
-	       Serial.println("Problem writing to channel. HTTP error code " + String(httpCode));
-	 }
-	client.stop();
-}
-
-MyMotor::MyMotor(int STBY, int PWMA, int AIN1, int AIN2) 
-	: STBY_(STBY), PWMA_(PWMA), AIN1_(AIN1), AIN2_(AIN2)
+MyMotor::MyMotor(int STBY, int PWMA, int AIN1, int AIN2, int BIN1, int BIN2) 
+	: STBY_(STBY), PWMA_(PWMA), AIN1_(AIN1), AIN2_(AIN2), BIN1_(BIN1), BIN2_(BIN2)
 {
     pinMode(STBY_, OUTPUT);
     pinMode(PWMA_, OUTPUT);
     pinMode(AIN1_, OUTPUT);
     pinMode(AIN2_, OUTPUT);
+    pinMode(BIN1_, OUTPUT);
+    pinMode(BIN2_, OUTPUT);
 
-    digitalWrite(AIN1_, HIGH);
-    digitalWrite(AIN2_, LOW);
+    digitalWrite(AIN1_, LOW);
+    digitalWrite(AIN2_, HIGH);
+    digitalWrite(BIN1_, LOW);
+    digitalWrite(BIN2_, HIGH);
     analogWrite(PWMA_, 1023);
     digitalWrite(STBY_, LOW);
 }
 
-void MyMotor::startWatering()
+void MyMotor::startWatering_A(int time_w)
 {
-    Serial.println("Start watering");
     digitalWrite(STBY_, HIGH);
+
+    digitalWrite(AIN1_, HIGH);
+    digitalWrite(AIN2_, LOW);
+    digitalWrite(BIN2_, HIGH);
+
+    delay(time_w*1000);
+}
+
+void MyMotor::startWatering_B(int time_w)
+{
+    digitalWrite(STBY_, HIGH);
+
+    digitalWrite(AIN1_, HIGH);
+    digitalWrite(AIN2_, HIGH);
+    digitalWrite(BIN2_, LOW);
+
+    delay(time_w*1000);
+}
+
+void MyMotor::startWatering(int time_w)
+{
+	startWatering_A(time_w);
+	startWatering_B(time_w);
 }
 
 void MyMotor::stopWatering()
 {
-    digitalWrite(STBY_, LOW);
-    Serial.println("Stop watering");
+    digitalWrite(STBY_, LOW); 
 }
