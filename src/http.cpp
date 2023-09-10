@@ -3,6 +3,7 @@
 String load_page()
 {
   //the HTML of the web page
+ EEPROM.begin(512);
 	String page = "";
  page = "<!DOCTYPE HTML>";
  page += "<html>";

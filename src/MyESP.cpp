@@ -10,7 +10,6 @@ Serial.begin(9600);
   analogWrite(LED_BUILTIN, 1024);
   measuer5minuts.attach(300, goSleep);
   Serial.begin(9600);
- EEPROM.begin(512);
   //time_water = EEPROM.read(0);
  // h_water = EEPROM.read(1);
 // act_line = EEPROM.read(299);
@@ -132,8 +131,11 @@ int MyESP::getH()
 
 int MyESP::checkIfWatering()
 {
+		  EEPROM.begin(512);
   int z[8];
- int czy_podlewac = 0;
+  int czy_podlewac = 0;
+ int n_line = EEPROM.read(380);
+ Serial.println(n_line);
 for (int i = 0; i < 8; i++)
 {
     z[i] = readEEPROM(350 + i);

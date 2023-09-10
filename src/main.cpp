@@ -16,6 +16,7 @@ int didPageStart = 0;
 	//if (myESP.doesPushButtonPrest())
 	if (1)
 	{
+		myESP.checkIfWatering();
 		myESP.startPage();
 //		myESP.blinkFast();
 //		didPageStart = 1;
