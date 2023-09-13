@@ -131,17 +131,17 @@ int MyESP::getH()
 
 int MyESP::checkIfWatering()
 {
-		  EEPROM.begin(512);
-  int z[8];
-  int czy_podlewac = 0;
+ EEPROM.begin(512);
  int n_line = EEPROM.read(380);
+ int actual_h = getH();
  Serial.println(n_line);
-for (int i = 0; i < 8; i++)
+for (int i = 0; i < n_line; i++)
 {
-    z[i] = readEEPROM(350 + i);
-    if (z[i] == getH() and z[i] != readLastWateringH()) czy_podlewac = 1;
+    int z = readEEPROM(350 + i);
+    if (z == actual_h and z != readLastWateringH()) 
+	    return 1;
 }
-return czy_podlewac;
+return 0;
 }
 
 int MyESP::readEEPROM(int place)
