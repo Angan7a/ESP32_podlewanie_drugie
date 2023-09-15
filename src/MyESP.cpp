@@ -4,13 +4,12 @@
 
 MyESP::MyESP()
 {
-Serial.begin(9600);	
+Serial.begin(115200);	
 
   pinMode(LED_BUILTIN, OUTPUT);
   analogWrite(LED_BUILTIN, 1024);
   measuer5minuts.attach(300, goSleep);
-  Serial.begin(9600);
-  //time_water = EEPROM.read(0);
+
  // h_water = EEPROM.read(1);
 // act_line = EEPROM.read(299);
   delay(100);
@@ -39,6 +38,7 @@ int MyESP::startWiFi()
   WiFi.begin(ssid, password);
   while(WiFi.status() != WL_CONNECTED) { 
         delay(500);
+  Serial.print(". ");
   }
   Serial.println(WiFi.localIP());
   czas = getDateAndTime();
@@ -47,7 +47,7 @@ int MyESP::startWiFi()
 
 String MyESP::getDateAndTime()
 {
-/*	WiFiClient wifiClient;
+	WiFiClient wifiClient;
 
     const char *host = "http://worldtimeapi.org/api/timezone/Europe/Warsaw";
     HTTPClient http; 
@@ -73,7 +73,7 @@ String MyESP::getDateAndTime()
         String out = doc["datetime"]; // "2020-04-23T12:18:56.028849+02:00"
         return out;
   }
-  */
+  
   String er = "-1";
   return er;
 }
@@ -82,6 +82,10 @@ int MyESP::setStopWateringTime()
 {
 	ticker.detach();
 	analogWrite(LED_BUILTIN, 0);
+  EEPROM.begin(512);
+  int time_water = EEPROM.read(0);
+  Serial.println("Time_water: ");
+  Serial.print(time_water);
 	ticker.attach(2*time_water+10, motorStop);
 	return 0;
 }
@@ -93,6 +97,8 @@ void MyESP::watering()
 }
 
 void MyESP::startWatering(){
+  EEPROM.begin(512);
+  int time_water = EEPROM.read(0);
 	myMotor.startWatering(time_water);
 }
 
@@ -134,19 +140,15 @@ int MyESP::checkIfWatering()
  EEPROM.begin(512);
  int n_line = EEPROM.read(380);
  int actual_h = getH();
- Serial.println(n_line);
+ Serial.println("Actual_h - ");
+ Serial.println(actual_h);
 for (int i = 0; i < n_line; i++)
 {
-    int z = readEEPROM(350 + i);
+    int z = EEPROM.read(350 + i);
     if (z == actual_h and z != readLastWateringH()) 
 	    return 1;
 }
 return 0;
-}
-
-int MyESP::readEEPROM(int place)
-{
-	return EEPROM.read(place);
 }
 
 void MyESP::startPage()
@@ -219,6 +221,8 @@ void MyESP::saveDataToThinkSpeak()
 	unsigned long myChannelNumber = SECRET_CH_ID1;
 	const char * myWriteAPIKey = SECRET_WRITE_APIKEY1;
 
+  EEPROM.begin(512);
+  int time_water = EEPROM.read(0);
 	int httpCode = ThingSpeak.writeField(myChannelNumber, 1,time_water , myWriteAPIKey);
 
 	 if (httpCode == 200) {
