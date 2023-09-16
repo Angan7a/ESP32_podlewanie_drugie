@@ -104,6 +104,7 @@ void MyESP::startWatering(){
 
 void MyESP::saveWateringTime()
 {
+  EEPROM.begin(512);
   for(int i = 0; i < 20; i++)
   {
     EEPROM.write(20*act_line + (i+2), czas[i]);
@@ -120,12 +121,14 @@ void MyESP::saveWateringTime()
 void MyESP::writeLastWateringH()
 {
 
+  EEPROM.begin(512);
     EEPROM.write(230, getH());
       EEPROM.commit();
 }
 
 int MyESP::readLastWateringH()
 {
+  EEPROM.begin(512);
    return EEPROM.read(230);
 }
 

@@ -8,24 +8,16 @@ void setup() {
 
 	
 int didPageStart = 0;
-//		EEPROM.begin(512);
-//		EEPROM.write(350, 12);
-//	EEPROM.commit();
 	myESP.startWiFi();
 
 	//if (myESP.doesPushButtonPrest())
-	if (1)
+	if (0)
 	{
 		myESP.startPage();
-			if(myESP.checkIfWatering())
-			{
-					myESP.watering();
-			}
-//		myESP.blinkFast();
-//		didPageStart = 1;
 	}
 	else
 	{
+		myESP.startPage();
 		if (myESP.checkIfWatering())
 		{
 			myESP.watering();
@@ -34,16 +26,11 @@ int didPageStart = 0;
 			myESP.writeLastWateringH();
 		} else
 		{
-			ESP.deepSleep(20*60e6);
+		//	ESP.deepSleep(20*60e6);
 		}
 	} 
 }
 
 void loop() {
-//	if( didPageStart )
-//	{
-//		myESP.handle();
-//	}
-
 }
 
