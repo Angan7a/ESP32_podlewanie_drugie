@@ -21,13 +21,14 @@
 
 #define EEPROM_SIZE 512
 class MyMotor {
-	int STBY_ = 12; //standby
+	int PWMA_ = 32; //Speed control
+	int AIN2_ = 33; //Direction
+	int AIN1_ = 25; //Direction
+	int STBY_ = 26; //standby
+	int BIN1_ = 27; //Direction 1
+	int BIN2_ = 14; //Direction 0
+	int PWMB_ = 12; //Speed control
 	//Motor A
-	int PWMA_ = 5; //Speed control
-	int AIN1_ = 14; //Direction
-	int AIN2_ = 4; //Direction
-	int BIN1_ = 14; //Direction 1
-	int BIN2_ = 1; //Direction 0
 	int time_wait = 0;
 	Ticker d;
 	static void wait()
@@ -36,7 +37,7 @@ class MyMotor {
 		time_elaps++;
 	}
 public:
-	MyMotor(int STBY = 12, int PWMA = 5, int AIN1 = 14, int AIN2 = 4, int BIN1 = 14, int BIN2 = 1);
+	MyMotor(int STBY = 26, int PWMA = 32, int PWMB = 12, int AIN1 = 25, int AIN2 = 33, int BIN1 = 27, int BIN2 = 14);
 
 	void startWatering(int time_w);
 	void startWatering_A(int time_w);

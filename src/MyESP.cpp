@@ -238,11 +238,12 @@ void MyESP::saveDataToThinkSpeak()
 }
 
 
-MyMotor::MyMotor(int STBY, int PWMA, int AIN1, int AIN2, int BIN1, int BIN2) 
-	: STBY_(STBY), PWMA_(PWMA), AIN1_(AIN1), AIN2_(AIN2), BIN1_(BIN1), BIN2_(BIN2)
+MyMotor::MyMotor(int STBY, int PWMA, int PWMB, int AIN1, int AIN2, int BIN1, int BIN2) 
+	: STBY_(STBY), PWMA_(PWMA),PWMB_(PWMB), AIN1_(AIN1), AIN2_(AIN2), BIN1_(BIN1), BIN2_(BIN2)
 {
     pinMode(STBY_, OUTPUT);
     pinMode(PWMA_, OUTPUT);
+    pinMode(PWMB_, OUTPUT);
     pinMode(AIN1_, OUTPUT);
     pinMode(AIN2_, OUTPUT);
     pinMode(BIN1_, OUTPUT);
@@ -253,6 +254,7 @@ MyMotor::MyMotor(int STBY, int PWMA, int AIN1, int AIN2, int BIN1, int BIN2)
     digitalWrite(BIN1_, LOW);
     digitalWrite(BIN2_, HIGH);
     analogWrite(PWMA_, 1023);
+    analogWrite(PWMB_, 1023);
     digitalWrite(STBY_, LOW);
 }
 
