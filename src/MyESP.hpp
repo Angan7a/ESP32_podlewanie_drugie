@@ -93,6 +93,7 @@ const char* password = "b1e514f452ea181e991056b9cbee3df73acdb2c5e8bc6dafcd96c66a
 	}
     String getDateAndTime();
 public:
+	String myIP;
     void blinkFast();
     static MyMotor myMotor;
     //virtual int readEEPROM(int);

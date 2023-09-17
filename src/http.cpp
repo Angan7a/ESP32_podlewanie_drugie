@@ -12,6 +12,7 @@ String load_page()
  page += "</style>";
 
 page += "<body>";
+page += "<p><a href=\"/act?reload\"><button class=\"button\">Reload</button></a></p>";
 
 page += "<p><b>Ustawienia czasu podlewania:</b></p>";
 page += "<ul class=\"checkboxes\">";
@@ -77,13 +78,24 @@ for (int i = 0; i < n_line; i++)
     page +=  "<p></br></p>";
     page += "</form>";
     page += "<form action=\"/res\" method=\"get\">";
-    page += "<p><a class=\"button\" href=\"res\"><button>Restart</button></a>";
+    page += "<p><a class=\"button\" href=\"act?res\"><button>Restart</button></a>";
     page += "<p><b>Kiedy podlewano:</b></p>";
+
     int print_line = EEPROM.read(299);
-    for (int e = 0; e < 10; e++)
+for (int e = 0; e < 10; e++)
 {
-             page += EEPROM.read(20*e);
+    print_line--;
+    if (print_line < 0) print_line = 9;
+    page += "<p>";
+    for(int i = 0; i < 19; i++)
+    {
+         page += (char) EEPROM.read(20*print_line + (i+2));
+         if (i == 9 or i == 10)
+             page += " ";
+    }
+    page += "</p>";
 }
+
 page += "</body>";
 page += "<\/html>";
 

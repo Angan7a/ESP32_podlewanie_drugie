@@ -40,7 +40,8 @@ int MyESP::startWiFi()
         delay(500);
   Serial.print(". ");
   }
-  Serial.println(WiFi.localIP());
+  myIP = WiFi.localIP().toString();
+  Serial.println(myIP);
   czas = getDateAndTime();
   return 1;
 }
@@ -111,6 +112,7 @@ void MyESP::saveWateringTime()
     //delay(10);
     EEPROM.commit();
   }
+   act_line = EEPROM.read(299);
     act_line++;
     if (act_line > 9) act_line = 0;
   EEPROM.write(299, act_line);
@@ -198,7 +200,13 @@ void MyESP::startPage()
 	int t1 = in.toInt();
         EEPROM.write(0, t1);
 	EEPROM.commit();
-		
+    }
+    if (request->hasParam("reload")) {
+ 	page =  load_page();
+    	request->send(200, "text/html", "" + page + "");
+    }
+    if (request->hasParam("res")) {
+	    ESP.restart();
     }
  page =  load_page();
     request->send(200, "text/html", "" + page + "");
