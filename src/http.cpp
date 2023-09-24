@@ -78,7 +78,7 @@ for (int i = 0; i < n_line; i++)
     page +=  "<p></br></p>";
     page += "</form>";
     page += "<form action=\"/res\" method=\"get\">";
-    page += "<p><a class=\"button\" href=\"act?res\"><button>Restart</button></a>";
+    page += "<p><a class=\"button\" href=\"res\"><button>Restart</button></a>";
     page += "<p><b>Kiedy podlewano:</b></p>";
 
     int print_line = EEPROM.read(299);

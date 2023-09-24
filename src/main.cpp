@@ -26,7 +26,7 @@ int didPageStart = 0;
 			myESP.writeLastWateringH();
 		} else
 		{
-		//	ESP.deepSleep(20*60e6);
+//			myESP.goSleep();
 		}
 	} 
 }

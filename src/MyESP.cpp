@@ -205,13 +205,19 @@ void MyESP::startPage()
  	page =  load_page();
     	request->send(200, "text/html", "" + page + "");
     }
-    if (request->hasParam("res")) {
+    if (request->hasHeader("res")) {
+	    Serial.println("Resetuję się");
 	    ESP.restart();
     }
  page =  load_page();
     request->send(200, "text/html", "" + page + "");
   });
 
+  server.on("/res", HTTP_GET, [&] (AsyncWebServerRequest *request) {
+	    Serial.println("Resetuję się");
+    request->send(200, "text/html", "Reset <p><a href=\"/act?reload\"><button class=\"button\">Reload</button></a></p>");
+	    ESP.restart();
+  });
  // server.onNotFound(notFound);
   server.begin();
 
