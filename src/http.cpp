@@ -81,7 +81,7 @@ for (int i = 0; i < n_line; i++)
     page += "<p><a class=\"button\" href=\"res\"><button>Restart</button></a>";
     page += "<p><b>Kiedy podlewano:</b></p>";
 
-    int print_line = EEPROM.read(299);
+int print_line = EEPROM.read(299);
 for (int e = 0; e < 10; e++)
 {
     print_line--;
@@ -93,9 +93,8 @@ for (int e = 0; e < 10; e++)
          if (i == 9 or i == 10)
              page += " ";
     }
-    page += "</p>";
+    page += "</p>"; 
 }
-
 page += "</body>";
 page += "<\/html>";
 
